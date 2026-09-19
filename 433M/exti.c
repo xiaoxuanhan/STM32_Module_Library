@@ -1,20 +1,3 @@
-# 433M模块
-
-## 1.模块介绍
-
-433M分为发射模块TX以及接收模块RX；
-
-GND---GND
-
-VCC---VCC
-
-D0---PB5
-
-D1---PA12
-
-## 2.exit.c
-
-```#include "led.h"
 #include "exti.h"
 #include "sys.h"
 #include "delay.h"
@@ -26,28 +9,27 @@ uint8_t buttonB_flag = FALSE;
 void exti_init(void)
 {
 	GPIO_InitTypeDef gpio_initstruct;
-	//打开时钟
+	//��ʱ��
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	
-	//调用GPIO的初始化函数
+	//����GPIO�ĳ�ʼ������
 	gpio_initstruct.Pin = GPIO_PIN_12;
 	gpio_initstruct.Pull = GPIO_PULLDOWN;
-	gpio_initstruct.Mode = GPIO_MODE_IT_RISING;//上升沿触发中断函数
+	gpio_initstruct.Mode = GPIO_MODE_IT_RISING;
 	HAL_GPIO_Init(GPIOA,&gpio_initstruct);
 	HAL_NVIC_SetPriority(EXTI15_10_IRQn,2,0);
 	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 	
 	gpio_initstruct.Pin = GPIO_PIN_5;
 	gpio_initstruct.Pull = GPIO_PULLDOWN;
-	gpio_initstruct.Mode = GPIO_MODE_IT_RISING;//上升沿触发中断函数
+	gpio_initstruct.Mode = GPIO_MODE_IT_RISING;
 	HAL_GPIO_Init(GPIOB,&gpio_initstruct);
 	HAL_NVIC_SetPriority(EXTI9_5_IRQn,2,0);
 	HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 	
 	
 }
-//中断服务函数
 void EXTI15_10_IRQHandler(void)
 {
 	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_12);
@@ -58,7 +40,6 @@ void EXTI9_5_IRQHandler(void)
 	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
 }
 
-//中断回调函数
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if (GPIO_Pin == GPIO_PIN_12)
@@ -100,25 +81,3 @@ void buttonB_flag_set(uint8_t value)
 {
 	buttonB_flag = value;
 }
-```
-
-其实就是一个按键控制433M，给433M相对应的接口高电平，433M检测到高电平之后就会触发中断，就会调用中断服务函数，然后进入中调回调函数，在中断回调函数里面，如果检测到高电平就给FLAg值，通过FLAG值参与后续的一些程序；
-
-## 3.exit.h
-
-```#ifndef __LED_H__
-#ifndef __EXTI_H__
-#define __EXTI_H__
-
-#include "stdint.h"
-#define TRUE 1
-#define FALSE 0
-
-void exti_init(void);
-uint8_t buttonA_flag_get(void);
-void buttonA_flag_set(uint8_t value);
-uint8_t buttonB_flag_get(void);
-void buttonB_flag_set(uint8_t value);
-
-#endif
-```
